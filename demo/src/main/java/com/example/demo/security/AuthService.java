@@ -49,14 +49,17 @@ public class AuthService {
     }
 
 
-    public TokenResponse signIn(String username, String password){
+    public TokenResponse signIn(String username, String password) {
+        // Validar las credenciales con Spring Security
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        username,
-                        password
-                )
+                new UsernamePasswordAuthenticationToken(username, password)
         );
-        var account = userRepository.findByEmail(username).orElseThrow();
+
+        // Buscar el usuario por username, no por email
+        var account = userRepository.findByUsername(username)
+                .orElseThrow(() -> new BadRequestException("Credenciales inválidas"));
+
+        // Generar token JWT
         var token = jwtService.generateToken(account);
         return new TokenResponse(token);
     }
